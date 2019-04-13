@@ -1,16 +1,31 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import CardList from '../components/CardList';
 import SearchBox from '../components/SearchBox';
 import Scroll from '../components/Scroll';
 import ErrorBoundry from '../components/ErrorBoundry';
 import './app.css';
 
+import { setSearchField } from '../actions';
+
+const mapStateToProps = state => {
+    return {
+        searchfield: state.searchfield 
+    }
+}
+
+const mapDispatchTopProps = (dispatch) => {
+    return {
+        onSearchChange: (event) => dispatch(setSearchField(event.target.value))
+    }
+}
+
+
 class App extends Component {
     constructor(){
         super()
         this.state = {
-            robots: [],
-            searchfield: '' 
+            robots: []
         }
     }
 
@@ -20,13 +35,10 @@ class App extends Component {
             .then(users => this.setState({ robots: users }));    
     }
 
-    onSearchChange = (event) =>{
-        this.setState({ searchfield: event.target.value })  
-    }
-
     render(){
+        const { searchfield, onSearchChange } = this.props;
         const filteredRobots = this.state.robots.filter(robot =>{
-            return robot.name.toLowerCase().includes(this.state.searchfield.toLowerCase())
+            return robot.name.toLowerCase().includes(searchfield.toLowerCase())
         })
         return !this.state.robots.length ?
              <h1 className='tc'>Loading</h1>
@@ -34,7 +46,7 @@ class App extends Component {
             (
                 <div className='tc'>
                     <h1 className="f1">RoboFriends</h1>
-                    <SearchBox searchChange={ this.onSearchChange } />
+                    <SearchBox searchChange={ onSearchChange } />
                     <Scroll>
                         <ErrorBoundry>
                             <CardList robots={ filteredRobots } />
@@ -45,4 +57,4 @@ class App extends Component {
     }
     
 }
-export default App;
+export default connect(mapStateToProps, mapDispatchTopProps)(App);
